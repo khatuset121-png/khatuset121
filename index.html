@@ -5,48 +5,111 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Railway Booking Helper Hindi</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:20px;color:#172554}
-main{max-width:500px;margin:auto;background:white;padding:22px;border-radius:16px;box-shadow:0 4px 18px #cbd5e1}
+body{font-family:Arial,sans-serif;background:#f1f5f9;margin:0;padding:16px;color:#173554}
+main{max-width:600px;margin:auto;background:white;padding:20px;border-radius:14px}
 h1{color:#087f5b;font-size:25px}
 label{display:block;margin-top:14px;font-weight:bold}
-input,select{width:100%;padding:12px;margin-top:6px;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
-button,.link{display:block;width:100%;box-sizing:border-box;margin-top:16px;padding:13px;background:#087f5b;color:white;text-align:center;border:0;border-radius:8px;font-size:16px;text-decoration:none}
-.note{font-size:13px;color:#64748b;line-height:1.5}
+input,select{width:100%;padding:12px;margin-top:6px;box-sizing:border-box;border:1px solid #bdc5d1;border-radius:7px;font-size:16px}
+button,.link{display:block;width:100%;box-sizing:border-box;margin-top:14px;padding:13px;background:#087f5b;color:white;text-align:center;border:0;border-radius:7px;font-size:16px;text-decoration:none}
+.secondary{background:#245b9e}
+.person{border:1px solid #ddd;padding:12px;margin-top:12px;border-radius:8px}
+.note{font-size:13px;color:#64748b;line-height:1.6}
 </style>
 </head>
 <body>
 <main>
 <h1>🚆 Railway Booking Helper</h1>
-<p>अपनी ट्रेन यात्रा की जानकारी तैयार करें।</p>
+<p>ट्रेन यात्रा की जानकारी तैयार करें और बुकिंग से पहले जाँचें।</p>
+
 <label>कहाँ से (स्टेशन कोड या नाम)</label>
 <input id="from" placeholder="जैसे PNBE">
+
 <label>कहाँ तक (स्टेशन कोड या नाम)</label>
-<input id="to" placeholder="जैसे JP">
+<input id="to" placeholder="जैसे NDLS">
+
 <label>यात्रा की तारीख</label>
 <input id="date" type="date">
+
 <label>क्लास</label>
 <select id="class">
-<option>SL - Sleeper</option>
-<option>3A - AC 3 Tier</option>
-<option>2A - AC 2 Tier</option>
-<option>CC - Chair Car</option>
-<option>2S - Second Sitting</option>
+<option value="SL">SL - Sleeper</option>
+<option value="3A">3A - AC 3 Tier</option>
+<option value="2A">2A - AC 2 Tier</option>
+<option value="1A">1A - AC First Class</option>
+<option value="CC">CC - Chair Car</option>
+<option value="2S">2S - Second Sitting</option>
 </select>
-<button onclick="prepare()">यात्रा की जानकारी तैयार करें</button>
-<p id="result"></p>
-<a class="link" href="https://www.irctc.co.in/" target="_blank" rel="noopener">आधिकारिक IRCTC वेबसाइट खोलें</a>
-<p class="note">यह सहायक टूल है, टिकट बुक नहीं करता। अपना पासवर्ड, OTP या भुगतान की जानकारी यहाँ न डालें।</p>
+
+<h3>यात्रियों की जानकारी</h3>
+<div id="people"></div>
+<button type="button" class="secondary" onclick="addPerson()">+ यात्री जोड़ें</button>
+
+<button type="button" onclick="prepare()">यात्रा की जानकारी जाँचें</button>
+<div id="result" aria-live="polite"></div>
+
+<a class="link" href="https://www.irctc.co.in/nget/train-search" target="_blank" rel="noopener">आधिकारिक IRCTC पर ट्रेन खोजें</a>
+
+<p class="note">यह सहायक टिकट बुक नहीं करता। ट्रेन, किराया और सीट की लाइव उपलब्धता IRCTC पर जाँचें। यात्री की जानकारी इस पेज पर स्थायी रूप से सेव नहीं होती।</p>
 </main>
+
 <script>
-function prepare(){
- const from=document.getElementById('from').value.trim();
- const to=document.getElementById('to').value.trim();
- const date=document.getElementById('date').value;
- const cls=document.getElementById('class').value;
- const result=document.getElementById('result');
- if(!from||!to||!date){result.textContent='कृपया स्टेशन और यात्रा की तारीख भरें।';return;}
- result.textContent='यात्रा: '+from.toUpperCase()+' से '+to.toUpperCase()+' | तारीख: '+date+' | क्लास: '+cls+'. अब IRCTC पर जाकर उपलब्धता जाँचें।';
+let count=0;
+
+function addPerson(){
+ if(count>=6){alert("एक बार में अधिकतम 6 यात्रियों की जानकारी जोड़ें।");return;}
+ count++;
+ const d=document.createElement("div");
+ d.className="person";
+ d.innerHTML=`
+ <h4>यात्री ${count}</h4>
+ <label>नाम</label><input class="pname" maxlength="50" placeholder="यात्री का नाम">
+ <label>उम्र</label><input class="page" type="number" min="1" max="120" placeholder="उम्र">
+ <label>लिंग</label><select class="pgender">
+ <option value="">चुनें</option><option>पुरुष</option><option>महिला</option><option>अन्य</option>
+ </select>`;
+ document.getElementById("people").appendChild(d);
 }
+function prepare(){
+ const from=document.getElementById("from").value.trim();
+ const to=document.getElementById("to").value.trim();
+ const date=document.getElementById("date").value;
+ const cls=document.getElementById("class").value;
+ const result=document.getElementById("result");
+ const people=[...document.querySelectorAll(".person")];
+ if(!from||!to||!date){alert("कृपया स्टेशन और यात्रा की तारीख भरें।");return;}
+ if(from.toLowerCase()===to.toLowerCase()){alert("कृपया अलग-अलग स्टेशन चुनें।");return;}
+ if(date<new Date().toLocaleDateString("en-CA")){alert("बीती हुई तारीख न चुनें।");return;}
+ if(people.length===0){alert("कम से कम एक यात्री जोड़ें।");return;}
+ const passengers=[];
+ for(const p of people){
+  const name=p.querySelector(".pname").value.trim();
+  const age=p.querySelector(".page").value;
+  const gender=p.querySelector(".pgender").value;
+  if(!name||!age||Number(age)<1||Number(age)>120||!gender){
+   alert("हर यात्री का नाम, सही उम्र और लिंग भरें।");return;
+  }
+  passengers.push({name,age,gender});
+ }
+ result.replaceChildren();
+ const heading=document.createElement("h3");
+ heading.textContent="यात्रा की जानकारी";
+ result.appendChild(heading);
+ const summary=document.createElement("p");
+ summary.textContent=${from.toUpperCase()} से ${to.toUpperCase()} | तारीख: ${date} | क्लास: ${cls} | यात्री: ${passengers.length};
+ result.appendChild(summary);
+ const list=document.createElement("ol");
+ passengers.forEach(p=>{
+  const item=document.createElement("li");
+  item.textContent=${p.name}, उम्र ${p.age}, ${p.gender};
+  list.appendChild(item);
+ });
+ result.appendChild(list);
+ const note=document.createElement("p");
+ note.className="note";
+ note.textContent="बुकिंग से पहले स्टेशन, तारीख, क्लास और सभी यात्रियों की जानकारी दोबारा जाँचें। किराया और सीट की उपलब्धता IRCTC पर ही पुष्टि करें।";
+ result.appendChild(note);
+}
+addPerson();
 </script>
 </body>
 </html>
